@@ -28,7 +28,7 @@ final class Property extends AbstractResource
         string $postcode,
         int $houseNumber,
         ?string $houseLetter = null,
-        ?string $houseNumberAddition = null,
+        ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/property/woz-waarde', [
             'postcode' => $postcode,
@@ -47,7 +47,7 @@ final class Property extends AbstractResource
         string $postcode,
         int $houseNumber,
         ?string $houseLetter = null,
-        ?string $houseNumberAddition = null,
+        ?string $houseNumberAddition = null
     ): Response {
         // Dit endpoint noemt de postcode-parameter `zipcode`.
         return $this->transport->get('/v1/property/energy-label', [
@@ -67,7 +67,7 @@ final class Property extends AbstractResource
         string $postcode,
         int $houseNumber,
         ?string $houseLetter = null,
-        ?string $houseNumberAddition = null,
+        ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/property/pandgegevens', [
             'postcode' => $postcode,

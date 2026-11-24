@@ -13,8 +13,12 @@ use GetApi\Http\Transport;
  */
 abstract class AbstractResource
 {
-    public function __construct(protected readonly Transport $transport)
+    /** @var Transport */
+    protected $transport;
+
+    public function __construct(Transport $transport)
     {
+        $this->transport = $transport;
     }
 
     /**
@@ -25,7 +29,7 @@ abstract class AbstractResource
     protected function houseParameters(
         int $houseNumber,
         ?string $houseLetter,
-        ?string $houseNumberAddition,
+        ?string $houseNumberAddition
     ): array {
         return [
             'house_number' => $houseNumber,

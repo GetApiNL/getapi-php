@@ -16,7 +16,7 @@ final class ResourcesTest extends TestCase
 
     public function testKvkZoekenOpNaam(): void
     {
-        $this->clientReturning(200, ['results' => []])->kvk()->search(naam: 'Voorbeeld', size: 10);
+        $this->clientReturning(200, ['results' => []])->kvk()->search('Voorbeeld', null, 1, 10);
 
         self::assertSame('GET', $this->lastRequest()->getMethod());
         self::assertSame('/v1/kvk/search', $this->lastRequest()->getUri()->getPath());
@@ -25,7 +25,7 @@ final class ResourcesTest extends TestCase
 
     public function testKvkZoekenLaatLegeParametersWeg(): void
     {
-        $this->clientReturning(200)->kvk()->search(kvkNummer: '53743792');
+        $this->clientReturning(200)->kvk()->search(null, '53743792');
 
         self::assertArrayNotHasKey('naam', $this->lastQuery());
         self::assertSame('53743792', $this->lastQuery()['kvkNummer']);
@@ -43,7 +43,7 @@ final class ResourcesTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $this->clientReturning(200)->kvk()->search(naam: 'Voorbeeld', size: 30);
+        $this->clientReturning(200)->kvk()->search('Voorbeeld', null, 1, 30);
     }
 
     public function testKvkValidateIsEenAntwoordBijOngeldig(): void

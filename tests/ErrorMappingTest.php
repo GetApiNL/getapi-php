@@ -14,7 +14,6 @@ use GetApi\Exceptions\UpstreamUnavailableException;
 use GetApi\Exceptions\ValidationException;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Response;
-use PHPUnit\Framework\Attributes\DataProvider;
 
 final class ErrorMappingTest extends TestCase
 {
@@ -37,9 +36,10 @@ final class ErrorMappingTest extends TestCase
     }
 
     /**
+     * @dataProvider statusProvider
+     *
      * @param class-string<ApiException> $expected
      */
-    #[DataProvider('statusProvider')]
     public function testStatusWordtDeJuisteException(int $status, string $expected): void
     {
         $getapi = $this->clientReturning($status, ['message' => 'iets']);

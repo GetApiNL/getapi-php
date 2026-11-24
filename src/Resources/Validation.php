@@ -28,7 +28,7 @@ final class Validation extends AbstractResource
      */
     public function vat(string $vatNumber): Response
     {
-        return $this->transport->post('/v1/validate/vat', ['vat_number' => preg_replace('/\s+/', '', $vatNumber)], invalidIsAnswer: true);
+        return $this->transport->post('/v1/validate/vat', ['vat_number' => preg_replace('/\s+/', '', $vatNumber)], true);
     }
 
     /**
@@ -44,7 +44,7 @@ final class Validation extends AbstractResource
             $body['bic'] = $bic;
         }
 
-        return $this->transport->post('/v1/validate/iban', $body, invalidIsAnswer: true);
+        return $this->transport->post('/v1/validate/iban', $body, true);
     }
 
     /**
@@ -54,7 +54,7 @@ final class Validation extends AbstractResource
      */
     public function email(string $email): Response
     {
-        return $this->transport->post('/v1/validate/email', ['email' => $email], invalidIsAnswer: true);
+        return $this->transport->post('/v1/validate/email', ['email' => $email], true);
     }
 
     /**
@@ -70,7 +70,7 @@ final class Validation extends AbstractResource
             throw new InvalidArgumentException('Geef tussen 1 en 25 e-mailadressen op.');
         }
 
-        return $this->transport->post('/v1/validate/email/batch', ['emails' => array_values($emails)], invalidIsAnswer: true);
+        return $this->transport->post('/v1/validate/email/batch', ['emails' => array_values($emails)], true);
     }
 
     /**
@@ -80,7 +80,7 @@ final class Validation extends AbstractResource
      */
     public function disposableEmail(string $email): Response
     {
-        return $this->transport->post('/v1/validate/email/disposable', ['email' => $email], invalidIsAnswer: true);
+        return $this->transport->post('/v1/validate/email/disposable', ['email' => $email], true);
     }
 
     /**

@@ -71,6 +71,6 @@ final class Kvk extends AbstractResource
      */
     public function validate(string $kvkNummer): Response
     {
-        return $this->transport->post('/v1/kvk/validate', ['kvkNummer' => trim($kvkNummer)], invalidIsAnswer: true);
+        return $this->transport->post('/v1/kvk/validate', ['kvkNummer' => trim($kvkNummer)], true);
     }
 }

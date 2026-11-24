@@ -27,7 +27,7 @@ final class Address extends AbstractResource
         string $postcode,
         int $houseNumber,
         ?string $houseLetter = null,
-        ?string $houseNumberAddition = null,
+        ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/kadaster/bag/address', [
             'postcode' => $postcode,

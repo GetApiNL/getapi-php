@@ -11,16 +11,17 @@ namespace GetApi\Exceptions;
  */
 class RateLimitException extends ApiException
 {
+    /** @var int|null */
+    private $retryAfter;
+
     /**
      * @param array<string, mixed> $data
      */
-    public function __construct(
-        string $message,
-        int $statusCode,
-        array $data = [],
-        private readonly ?int $retryAfter = null,
-    ) {
+    public function __construct(string $message, int $statusCode, array $data = [], ?int $retryAfter = null)
+    {
         parent::__construct($message, $statusCode, $data);
+
+        $this->retryAfter = $retryAfter;
     }
 
     /** Aantal seconden dat je moet wachten, of null als de API dat niet aangaf. */

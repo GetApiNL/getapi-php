@@ -13,6 +13,7 @@ use GetApi\Exceptions\RateLimitException;
 use GetApi\Exceptions\UpstreamUnavailableException;
 use GetApi\Exceptions\ValidationException;
 use GetApi\Response;
+use InvalidArgumentException;
 use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\RequestFactoryInterface;
@@ -28,15 +29,43 @@ use Psr\Http\Message\StreamFactoryInterface;
  */
 final class Transport
 {
+    /** @var string */
+    private $apiKey;
+
+    /** @var string */
+    private $baseUrl;
+
+    /** @var ClientInterface */
+    private $httpClient;
+
+    /** @var RequestFactoryInterface */
+    private $requestFactory;
+
+    /** @var StreamFactoryInterface */
+    private $streamFactory;
+
+    /** @var string */
+    private $userAgent;
+
+    /** @var string */
+    private $clientName;
+
     public function __construct(
-        private readonly string $apiKey,
-        private readonly string $baseUrl,
-        private readonly ClientInterface $httpClient,
-        private readonly RequestFactoryInterface $requestFactory,
-        private readonly StreamFactoryInterface $streamFactory,
-        private readonly string $userAgent,
-        private readonly string $clientName,
+        string $apiKey,
+        string $baseUrl,
+        ClientInterface $httpClient,
+        RequestFactoryInterface $requestFactory,
+        StreamFactoryInterface $streamFactory,
+        string $userAgent,
+        string $clientName
     ) {
+        $this->apiKey = $apiKey;
+        $this->baseUrl = $baseUrl;
+        $this->httpClient = $httpClient;
+        $this->requestFactory = $requestFactory;
+        $this->streamFactory = $streamFactory;
+        $this->userAgent = $userAgent;
+        $this->clientName = $clientName;
     }
 
     /**
@@ -67,7 +96,9 @@ final class Transport
      */
     private function send(string $method, string $path, array $query, ?array $body, bool $invalidIsAnswer): Response
     {
-        $query = array_filter($query, static fn ($value): bool => $value !== null && $value !== '');
+        $query = array_filter($query, static function ($value): bool {
+            return $value !== null && $value !== '';
+        });
 
         $url = rtrim($this->baseUrl, '/') . $path;
         if ($query !== []) {
@@ -81,9 +112,14 @@ final class Transport
             ->withHeader('X-GetAPI-Client', $this->clientName);
 
         if ($body !== null) {
+            $json = json_encode($body);
+            if ($json === false) {
+                throw new InvalidArgumentException('De invoer kon niet naar JSON worden omgezet: ' . json_last_error_msg() . '.');
+            }
+
             $request = $request
                 ->withHeader('Content-Type', 'application/json')
-                ->withBody($this->streamFactory->createStream(json_encode($body, JSON_THROW_ON_ERROR)));
+                ->withBody($this->streamFactory->createStream($json));
         }
 
         try {
@@ -92,7 +128,7 @@ final class Transport
             throw new ConnectionException(
                 'Kon GetAPI niet bereiken: ' . $e->getMessage() . '. Controleer je internetverbinding en probeer het opnieuw.',
                 0,
-                $e,
+                $e
             );
         }
 
@@ -111,7 +147,7 @@ final class Transport
             if (!is_array($decoded)) {
                 throw new ApiException(
                     'GetAPI gaf een antwoord dat geen geldige JSON is (HTTP ' . $status . ').',
-                    $status,
+                    $status
                 );
             }
             $data = $decoded;
@@ -154,7 +190,7 @@ final class Transport
                     'Je credits zijn op. Waardeer je saldo op of wacht tot je maandelijkse credits worden aangevuld.',
                     $status,
                     $data,
-                    $topup,
+                    $topup
                 );
             case 404:
                 return new NotFoundException($apiMessage ?? 'Niets gevonden voor deze aanvraag.', $status, $data);
@@ -174,13 +210,13 @@ final class Transport
                     'Te veel verzoeken per minuut voor deze API-key. Probeer het over ' . ($retryAfter ?? 'enkele') . ' seconden opnieuw.',
                     $status,
                     $data,
-                    $retryAfter,
+                    $retryAfter
                 );
             case 503:
                 return new UpstreamUnavailableException(
                     $apiMessage ?? 'De onderliggende bron (bijvoorbeeld KVK of VIES) is tijdelijk niet beschikbaar. Probeer het later opnieuw.',
                     $status,
-                    $data,
+                    $data
                 );
             default:
                 return new ApiException($apiMessage ?? 'GetAPI gaf een onverwachte fout (HTTP ' . $status . ').', $status, $data);

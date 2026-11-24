@@ -30,7 +30,7 @@ final class ClientTest extends TestCase
     {
         $this->http->addResponse(new \Nyholm\Psr7\Response(200, [], '{}'));
         $factory = new Psr17Factory();
-        $getapi = new GetApi('ga_live_test', $this->http, $factory, $factory, clientName: 'getapi-laravel/1.0.0', platform: 'laravel/12');
+        $getapi = new GetApi('ga_live_test', $this->http, $factory, $factory, GetApi::DEFAULT_BASE_URL, 'getapi-laravel/1.0.0', 'laravel/12');
 
         $getapi->kvk()->get('53743792');
 

@@ -39,10 +39,11 @@ final class GetApi
     /** Standaard basis-URL van de GetAPI.nl API. */
     public const DEFAULT_BASE_URL = 'https://api.getapi.nl';
 
-    private readonly Transport $transport;
+    /** @var Transport */
+    private $transport;
 
     /** @var array<string, object> */
-    private array $resources = [];
+    private $resources = [];
 
     /**
      * @param string                       $apiKey         Je GetAPI API-key (begint met `ga_live_`).
@@ -62,7 +63,7 @@ final class GetApi
         ?StreamFactoryInterface $streamFactory = null,
         string $baseUrl = self::DEFAULT_BASE_URL,
         ?string $clientName = null,
-        ?string $platform = null,
+        ?string $platform = null
     ) {
         if (trim($apiKey) === '') {
             throw new InvalidArgumentException(
@@ -74,13 +75,13 @@ final class GetApi
         $userAgent = 'getapi-php/' . self::VERSION . ' (' . $php . ($platform !== null && $platform !== '' ? '; ' . $platform : '') . ')';
 
         $this->transport = new Transport(
-            apiKey: trim($apiKey),
-            baseUrl: $baseUrl,
-            httpClient: $httpClient ?? Psr18ClientDiscovery::find(),
-            requestFactory: $requestFactory ?? Psr17FactoryDiscovery::findRequestFactory(),
-            streamFactory: $streamFactory ?? Psr17FactoryDiscovery::findStreamFactory(),
-            userAgent: $userAgent,
-            clientName: $clientName ?? 'getapi-php/' . self::VERSION,
+            trim($apiKey),
+            $baseUrl,
+            $httpClient ?? Psr18ClientDiscovery::find(),
+            $requestFactory ?? Psr17FactoryDiscovery::findRequestFactory(),
+            $streamFactory ?? Psr17FactoryDiscovery::findStreamFactory(),
+            $userAgent,
+            $clientName ?? 'getapi-php/' . self::VERSION
         );
     }
 
@@ -135,6 +136,10 @@ final class GetApi
      */
     private function resource(string $class): object
     {
-        return $this->resources[$class] ??= new $class($this->transport);
+        if (!isset($this->resources[$class])) {
+            $this->resources[$class] = new $class($this->transport);
+        }
+
+        return $this->resources[$class];
     }
 }

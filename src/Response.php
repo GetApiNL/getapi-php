@@ -13,17 +13,41 @@ namespace GetApi;
 final class Response
 {
     /**
+     * De JSON-gegevens uit het antwoord, als array. Alleen lezen.
+     *
+     * @var array<string, mixed>
+     */
+    public $data;
+
+    /**
+     * De HTTP-statuscode (200 bij succes). Alleen lezen.
+     *
+     * @var int
+     */
+    public $statusCode;
+
+    /**
+     * Aantal credits dat je nog hebt, uit de header `X-Credits-Remaining`. Alleen lezen.
+     *
+     * @var int|null
+     */
+    public $creditsRemaining;
+
+    /** @var array<string, string> */
+    private $headers;
+
+    /**
      * @param array<string, mixed>  $data             De JSON-gegevens uit het antwoord, als array.
      * @param int                   $statusCode       De HTTP-statuscode (200 bij succes).
      * @param int|null              $creditsRemaining Aantal credits dat je nog hebt, uit de header `X-Credits-Remaining`.
      * @param array<string, string> $headers          Alle headers, met kleine letters als sleutel.
      */
-    public function __construct(
-        public readonly array $data,
-        public readonly int $statusCode = 200,
-        public readonly ?int $creditsRemaining = null,
-        private readonly array $headers = [],
-    ) {
+    public function __construct(array $data, int $statusCode = 200, ?int $creditsRemaining = null, array $headers = [])
+    {
+        $this->data = $data;
+        $this->statusCode = $statusCode;
+        $this->creditsRemaining = $creditsRemaining;
+        $this->headers = $headers;
     }
 
     /** Geeft de waarde van een header terug (hoofdletters maken niet uit), of null als die ontbreekt. */
@@ -39,7 +63,7 @@ final class Response
      *
      * @return mixed
      */
-    public function get(string $key, mixed $default = null): mixed
+    public function get(string $key, $default = null)
     {
         return $this->data[$key] ?? $default;
     }

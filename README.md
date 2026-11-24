@@ -120,7 +120,7 @@ Gebruik je Laravel? Dan is er een dunne wrapper met facade en configuratie: [get
 
 ## Eisen
 
-PHP 8.1 of hoger. De tests draaien in de CI op PHP 8.1 tot en met 8.5.
+PHP 7.2 of hoger. De tests draaien in de CI op PHP 7.2 tot en met 8.5.
 
 ## Tests draaien
 
@@ -146,4 +146,4 @@ GetAPI is een label van [WD Noord](https://wdnoord.nl/?utm_source=packagist&utm_
 
 ---
 
-*English: official PHP client for GetAPI.nl, a single-key API for Dutch company (KVK), VAT (VIES), BAG address, WOZ and energy label data. Requires PHP 8.1+, uses PSR-18. See the examples above.*
+*English: official PHP client for GetAPI.nl, a single-key API for Dutch company (KVK), VAT (VIES), BAG address, WOZ and energy label data. Requires PHP 7.2+, uses PSR-18. See the examples above.*

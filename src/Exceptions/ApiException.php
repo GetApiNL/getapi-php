@@ -13,17 +13,23 @@ namespace GetApi\Exceptions;
  */
 class ApiException extends GetApiException
 {
+    /** @var int */
+    private $statusCode;
+
+    /** @var array<string, mixed> */
+    private $data;
+
     /**
      * @param string               $message    Een leesbare melding in het Nederlands.
      * @param int                  $statusCode De HTTP-statuscode.
      * @param array<string, mixed> $data       De JSON-inhoud van het foutantwoord, indien aanwezig.
      */
-    public function __construct(
-        string $message,
-        private readonly int $statusCode,
-        private readonly array $data = [],
-    ) {
+    public function __construct(string $message, int $statusCode, array $data = [])
+    {
         parent::__construct($message, $statusCode);
+
+        $this->statusCode = $statusCode;
+        $this->data = $data;
     }
 
     /** De HTTP-statuscode van het antwoord. */

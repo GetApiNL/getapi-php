@@ -16,7 +16,8 @@ use Psr\Http\Message\RequestInterface;
  */
 abstract class TestCase extends BaseTestCase
 {
-    protected MockClient $http;
+    /** @var MockClient */
+    protected $http;
 
     protected function setUp(): void
     {
@@ -34,7 +35,7 @@ abstract class TestCase extends BaseTestCase
         $this->http->addResponse(new Response(
             $status,
             ['Content-Type' => 'application/json'] + $headers,
-            $body === null ? '' : json_encode($body, JSON_THROW_ON_ERROR),
+            $body === null ? '' : (string) json_encode($body)
         ));
 
         $factory = new Psr17Factory();
@@ -65,6 +66,9 @@ abstract class TestCase extends BaseTestCase
      */
     protected function lastJsonBody(): array
     {
-        return json_decode((string) $this->lastRequest()->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        $decoded = json_decode((string) $this->lastRequest()->getBody(), true);
+        self::assertIsArray($decoded, 'De body van het verzoek is geen geldige JSON.');
+
+        return $decoded;
     }
 }

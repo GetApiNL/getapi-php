@@ -12,17 +12,18 @@ namespace GetApi\Exceptions;
  */
 class ValidationException extends ApiException
 {
+    /** @var array<string, mixed> */
+    private $errors;
+
     /**
      * @param array<string, mixed> $data
      * @param array<string, mixed> $errors Per veld een lijst met meldingen.
      */
-    public function __construct(
-        string $message,
-        int $statusCode,
-        array $data = [],
-        private readonly array $errors = [],
-    ) {
+    public function __construct(string $message, int $statusCode, array $data = [], array $errors = [])
+    {
         parent::__construct($message, $statusCode, $data);
+
+        $this->errors = $errors;
     }
 
     /**
