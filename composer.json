@@ -1,0 +1,68 @@
+{
+    "name": "getapinl/getapi",
+    "description": "Officiële PHP-client voor GetAPI.nl: KVK, BTW/VAT, BAG-adres, WOZ, energielabel en meer Nederlandse data via één API-key",
+    "type": "library",
+    "keywords": [
+        "kvk",
+        "kvk-api",
+        "btw",
+        "vat",
+        "vies",
+        "bag",
+        "postcode",
+        "woz",
+        "energielabel",
+        "netherlands",
+        "dutch",
+        "nederland",
+        "api-client",
+        "sdk",
+        "getapi"
+    ],
+    "homepage": "https://getapi.nl",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "GetAPI.nl",
+            "email": "info@getapi.nl",
+            "homepage": "https://getapi.nl"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/GetApiNL/getapi-php/issues",
+        "docs": "https://getapi.nl/docs"
+    },
+    "require": {
+        "php": "^8.1",
+        "php-http/discovery": "^1.19",
+        "psr/http-client": "^1.0",
+        "psr/http-factory": "^1.0",
+        "psr/http-message": "^1.1 || ^2.0"
+    },
+    "require-dev": {
+        "nyholm/psr7": "^1.8",
+        "php-http/mock-client": "^1.6",
+        "phpunit/phpunit": "^10.5 || ^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "GetApi\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "GetApi\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
