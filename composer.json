@@ -1,5 +1,5 @@
 {
-    "name": "getapinl/getapi",
+    "name": "getapinl/getapi-php",
     "description": "Officiële PHP-client voor GetAPI.nl: KVK, BTW/VAT, BAG-adres, WOZ, energielabel en meer Nederlandse data via één API-key",
     "type": "library",
     "keywords": [
