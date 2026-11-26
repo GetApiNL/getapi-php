@@ -30,13 +30,13 @@ final class ClientTest extends TestCase
     {
         $this->http->addResponse(new \Nyholm\Psr7\Response(200, [], '{}'));
         $factory = new Psr17Factory();
-        $getapi = new GetApi('ga_live_test', $this->http, $factory, $factory, GetApi::DEFAULT_BASE_URL, 'getapi-laravel/1.0.0', 'laravel/12');
+        $getapi = new GetApi('ga_live_test', $this->http, $factory, $factory, GetApi::DEFAULT_BASE_URL, 'mijn-wrapper/1.0.0', 'mijn-app/2.0');
 
         $getapi->kvk()->get('53743792');
 
-        self::assertSame('getapi-laravel/1.0.0', $this->lastRequest()->getHeaderLine('X-GetAPI-Client'));
+        self::assertSame('mijn-wrapper/1.0.0', $this->lastRequest()->getHeaderLine('X-GetAPI-Client'));
         self::assertStringContainsString('(php/', $this->lastRequest()->getHeaderLine('User-Agent'));
-        self::assertStringContainsString('; laravel/12)', $this->lastRequest()->getHeaderLine('User-Agent'));
+        self::assertStringContainsString('; mijn-app/2.0)', $this->lastRequest()->getHeaderLine('User-Agent'));
     }
 
     public function testLeegeApiKeyWordtGeweigerd(): void

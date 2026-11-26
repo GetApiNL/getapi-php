@@ -29,3 +29,28 @@ jobs:
 
       - name: Tests draaien
         run: composer test
+
+  quality:
+    runs-on: ubuntu-latest
+    name: Code-stijl en statische analyse
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: PHP installeren
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      - name: Afhankelijkheden installeren
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Tools installeren
+        run: composer tools
+
+      - name: Code-stijl controleren
+        run: composer cs
+
+      - name: Statische analyse
+        run: composer analyse

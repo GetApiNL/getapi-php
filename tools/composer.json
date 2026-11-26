@@ -1,0 +1,10 @@
+{
+    "description": "Ontwikkeltools. Staan los van het pakket zodat de PHP 7.2-installatie niet hierop vastloopt.",
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.64",
+        "phpstan/phpstan": "^2.0"
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

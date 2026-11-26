@@ -34,6 +34,8 @@
     },
     "require": {
         "php": "^7.2 || ^8.0",
+        "ext-json": "*",
+        "ext-mbstring": "*",
         "php-http/discovery": "^1.19",
         "psr/http-client": "^1.0",
         "psr/http-factory": "^1.0",
@@ -61,7 +63,11 @@
         }
     },
     "scripts": {
-        "test": "phpunit"
+        "test": "phpunit",
+        "tools": "composer install --working-dir=tools --no-interaction --no-progress",
+        "cs": "tools/vendor/bin/php-cs-fixer fix --dry-run --diff",
+        "cs:fix": "tools/vendor/bin/php-cs-fixer fix",
+        "analyse": "tools/vendor/bin/phpstan analyse --memory-limit=512M"
     },
     "minimum-stability": "stable",
     "prefer-stable": true

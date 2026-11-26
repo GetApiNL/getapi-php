@@ -31,12 +31,10 @@ use Psr\Http\Message\StreamFactoryInterface;
  * De client gebruikt PSR-18, dus elke HTTP-client werkt (Guzzle, Symfony HttpClient, enzovoort).
  * Geef je eigen client mee in de constructor, of laat de client er zelf een zoeken.
  */
-final class GetApi
+class GetApi
 {
-    /** Versie van deze client. Wordt meegestuurd in de User-Agent en in X-GetAPI-Client. */
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.1.0';
 
-    /** Standaard basis-URL van de GetAPI.nl API. */
     public const DEFAULT_BASE_URL = 'https://api.getapi.nl';
 
     /** @var Transport */
@@ -50,11 +48,11 @@ final class GetApi
      * @param ClientInterface|null         $httpClient     Eigen PSR-18 client. Laat leeg om er automatisch een te zoeken.
      * @param RequestFactoryInterface|null $requestFactory Eigen PSR-17 request factory. Laat leeg voor automatisch zoeken.
      * @param StreamFactoryInterface|null  $streamFactory  Eigen PSR-17 stream factory. Laat leeg voor automatisch zoeken.
-     * @param string                       $baseUrl        Basis-URL van de API. Alleen aanpassen voor tests.
-     * @param string|null                  $clientName     Naam en versie van een wrapper, bijvoorbeeld `getapi-laravel/1.0.0`.
-     * @param string|null                  $platform       Extra platforminfo voor de User-Agent, bijvoorbeeld `laravel/12`.
+     * @param string                       $baseUrl        Basis-URL van de API. Moet https zijn (http mag alleen voor localhost). Alleen aanpassen voor tests.
+     * @param string|null                  $clientName     Naam en versie van een wrapper, bijvoorbeeld `mijn-wrapper/1.0.0`.
+     * @param string|null                  $platform       Extra platforminfo voor de User-Agent, bijvoorbeeld `mijn-app/2.0`.
      *
-     * @throws InvalidArgumentException Als de API-key leeg is.
+     * @throws InvalidArgumentException Als de API-key leeg is of de basis-URL geen https gebruikt.
      */
     public function __construct(
         string $apiKey,
@@ -71,6 +69,8 @@ final class GetApi
             );
         }
 
+        self::assertSecureBaseUrl($baseUrl);
+
         $php = 'php/' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;
         $userAgent = 'getapi-php/' . self::VERSION . ' (' . $php . ($platform !== null && $platform !== '' ? '; ' . $platform : '') . ')';
 
@@ -83,6 +83,22 @@ final class GetApi
             $userAgent,
             $clientName ?? 'getapi-php/' . self::VERSION
         );
+    }
+
+    private static function assertSecureBaseUrl(string $baseUrl): void
+    {
+        $parts = parse_url($baseUrl);
+        $scheme = is_array($parts) && isset($parts['scheme']) ? strtolower($parts['scheme']) : '';
+        $host = is_array($parts) && isset($parts['host']) ? strtolower(trim($parts['host'], '[]')) : '';
+
+        if ($scheme === 'https' && $host !== '') {
+            return;
+        }
+        if ($scheme === 'http' && in_array($host, ['localhost', '127.0.0.1', '::1'], true)) {
+            return;
+        }
+
+        throw new InvalidArgumentException('De basis-URL moet met https:// beginnen, anders gaat je API-key onversleuteld over de lijn.');
     }
 
     /** KVK-handelsregister: bedrijven zoeken, details ophalen en KVK-nummers controleren. */

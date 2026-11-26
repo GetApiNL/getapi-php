@@ -21,6 +21,16 @@ abstract class AbstractResource
         $this->transport = $transport;
     }
 
+    protected function requireNonEmpty(string $value, string $label): string
+    {
+        $value = trim($value);
+        if ($value === '') {
+            throw new \InvalidArgumentException($label . ' mag niet leeg zijn.');
+        }
+
+        return $value;
+    }
+
     /**
      * Zet huisnummer, letter en toevoeging om naar de queryparameters van de API.
      *

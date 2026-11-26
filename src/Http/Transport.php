@@ -82,8 +82,7 @@ final class Transport
      * Stuurt een POST-verzoek met een JSON-body.
      *
      * @param array<string, mixed> $body
-     * @param bool                 $invalidIsAnswer Zet op true bij controles (BTW, IBAN, e-mail). Een ongeldige invoer
-     *                                              (HTTP 422) is dan een antwoord (`valid: false`) en geen fout.
+     * @param bool                 $invalidIsAnswer True bij controles: een 422 met een `valid`-sleutel is dan een antwoord.
      */
     public function post(string $path, array $body, bool $invalidIsAnswer = false): Response
     {
@@ -141,27 +140,30 @@ final class Transport
         $headers = $this->normalizeHeaders($response);
         $raw = (string) $response->getBody();
 
+        $success = $status >= 200 && $status < 300;
+
         $data = [];
         if ($raw !== '') {
             $decoded = json_decode($raw, true);
-            if (!is_array($decoded)) {
+            if (is_array($decoded)) {
+                $data = $decoded;
+            } elseif ($success) {
                 throw new ApiException(
                     'GetAPI gaf een antwoord dat geen geldige JSON is (HTTP ' . $status . ').',
                     $status
                 );
             }
-            $data = $decoded;
         }
 
         $credits = isset($headers['x-credits-remaining']) && is_numeric($headers['x-credits-remaining'])
             ? (int) $headers['x-credits-remaining']
             : null;
 
-        if ($status >= 200 && $status < 300) {
+        if ($success) {
             return new Response($data, $status, $credits, $headers);
         }
 
-        if ($status === 422 && $invalidIsAnswer) {
+        if ($status === 422 && $invalidIsAnswer && array_key_exists('valid', $data)) {
             return new Response($data, $status, $credits, $headers);
         }
 

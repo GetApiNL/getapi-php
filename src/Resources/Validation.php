@@ -10,12 +10,12 @@ use InvalidArgumentException;
 /**
  * Controles: BTW-nummer (VIES), IBAN, e-mailadres en IP-blacklists.
  *
- * Een ongeldige invoer is bij BTW-nummer, IBAN en e-mailadres geen fout. Je krijgt dan een antwoord
- * met `valid: false`. Controleer dus `$response->data['valid']` en vang geen exception op.
+ * Een ongeldig BTW-nummer, IBAN of e-mailadres is geen fout. Je krijgt dan een antwoord met `valid: false`.
+ * Controleer dus `$response->data['valid']`. Een echte invoerfout (bijvoorbeeld een te lang e-mailadres of een
+ * ontbrekend veld) geeft wel een ValidationException.
  */
-final class Validation extends AbstractResource
+class Validation extends AbstractResource
 {
-    /** Maximaal aantal e-mailadressen in één batch. */
     private const MAX_EMAIL_BATCH = 25;
 
     /**
@@ -28,7 +28,7 @@ final class Validation extends AbstractResource
      */
     public function vat(string $vatNumber): Response
     {
-        return $this->transport->post('/v1/validate/vat', ['vat_number' => preg_replace('/\s+/', '', $vatNumber)], true);
+        return $this->transport->post('/v1/validate/vat', ['vat_number' => preg_replace('/\s+/', '', $this->requireNonEmpty($vatNumber, 'Het BTW-nummer')) ?? ''], true);
     }
 
     /**
@@ -39,7 +39,7 @@ final class Validation extends AbstractResource
      */
     public function iban(string $iban, ?string $bic = null): Response
     {
-        $body = ['iban' => $iban];
+        $body = ['iban' => $this->requireNonEmpty($iban, 'De IBAN')];
         if ($bic !== null && $bic !== '') {
             $body['bic'] = $bic;
         }
@@ -54,13 +54,13 @@ final class Validation extends AbstractResource
      */
     public function email(string $email): Response
     {
-        return $this->transport->post('/v1/validate/email', ['email' => $email], true);
+        return $this->transport->post('/v1/validate/email', ['email' => $this->requireNonEmpty($email, 'Het e-mailadres')], true);
     }
 
     /**
      * Controleer maximaal 25 e-mailadressen in één aanroep.
      *
-     * @param list<string> $emails Tussen 1 en 25 e-mailadressen.
+     * @param array<string> $emails Tussen 1 en 25 e-mailadressen.
      *
      * @throws InvalidArgumentException Als de lijst leeg is of meer dan 25 adressen bevat.
      */
@@ -80,7 +80,7 @@ final class Validation extends AbstractResource
      */
     public function disposableEmail(string $email): Response
     {
-        return $this->transport->post('/v1/validate/email/disposable', ['email' => $email], true);
+        return $this->transport->post('/v1/validate/email/disposable', ['email' => $this->requireNonEmpty($email, 'Het e-mailadres')], true);
     }
 
     /**
@@ -90,6 +90,6 @@ final class Validation extends AbstractResource
      */
     public function dnsbl(string $ip): Response
     {
-        return $this->transport->post('/v1/validate/dnsbl', ['ip' => $ip]);
+        return $this->transport->post('/v1/validate/dnsbl', ['ip' => $this->requireNonEmpty($ip, 'Het IP-adres')]);
     }
 }

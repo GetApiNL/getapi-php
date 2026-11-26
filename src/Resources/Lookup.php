@@ -10,9 +10,8 @@ use InvalidArgumentException;
 /**
  * Opzoeken: IP-adres en DNS. Voor het opzoeken van een postcode gebruik je `$getapi->address()->postcode()`.
  */
-final class Lookup extends AbstractResource
+class Lookup extends AbstractResource
 {
-    /** Toegestane recordtypes voor een DNS-opzoeking. */
     private const DNS_TYPES = ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SOA', 'PTR', 'SRV', 'ALL'];
 
     /**
@@ -22,7 +21,7 @@ final class Lookup extends AbstractResource
      */
     public function ip(string $ip): Response
     {
-        return $this->transport->get('/v1/lookup/ip', ['ip' => $ip]);
+        return $this->transport->get('/v1/lookup/ip', ['ip' => $this->requireNonEmpty($ip, 'Het IP-adres')]);
     }
 
     /**
@@ -32,7 +31,7 @@ final class Lookup extends AbstractResource
      */
     public function dnsNameservers(string $domain): Response
     {
-        return $this->transport->get('/v1/lookup/dns/nameservers', ['domain' => $domain]);
+        return $this->transport->get('/v1/lookup/dns/nameservers', ['domain' => $this->requireNonEmpty($domain, 'Het domein')]);
     }
 
     /**
@@ -50,7 +49,7 @@ final class Lookup extends AbstractResource
         }
 
         return $this->transport->get('/v1/lookup/dns/records', [
-            'domain' => $domain,
+            'domain' => $this->requireNonEmpty($domain, 'Het domein'),
             'type' => $type !== null ? strtoupper($type) : null,
         ]);
     }

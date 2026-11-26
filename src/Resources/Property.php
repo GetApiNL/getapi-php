@@ -12,7 +12,7 @@ use GetApi\Response;
  * Voor alle methodes geldt: splits het adres in losse delen. Zet de letter of toevoeging nooit in het huisnummer.
  * Voorbeeld: `Hooidrift 161C-03` wordt huisnummer 161, letter `C` en toevoeging `03`.
  */
-final class Property extends AbstractResource
+class Property extends AbstractResource
 {
     /**
      * WOZ-waarde van een pand, met de waarden van de laatste drie jaar.
@@ -31,7 +31,7 @@ final class Property extends AbstractResource
         ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/property/woz-waarde', [
-            'postcode' => $postcode,
+            'postcode' => $this->requireNonEmpty($postcode, 'De postcode'),
         ] + $this->houseParameters($houseNumber, $houseLetter, $houseNumberAddition));
     }
 
@@ -49,9 +49,8 @@ final class Property extends AbstractResource
         ?string $houseLetter = null,
         ?string $houseNumberAddition = null
     ): Response {
-        // Dit endpoint noemt de postcode-parameter `zipcode`.
         return $this->transport->get('/v1/property/energy-label', [
-            'zipcode' => $postcode,
+            'zipcode' => $this->requireNonEmpty($postcode, 'De postcode'),
         ] + $this->houseParameters($houseNumber, $houseLetter, $houseNumberAddition));
     }
 
@@ -70,7 +69,7 @@ final class Property extends AbstractResource
         ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/property/pandgegevens', [
-            'postcode' => $postcode,
+            'postcode' => $this->requireNonEmpty($postcode, 'De postcode'),
         ] + $this->houseParameters($houseNumber, $houseLetter, $houseNumberAddition));
     }
 }

@@ -10,9 +10,8 @@ use InvalidArgumentException;
 /**
  * KVK-handelsregister: bedrijven zoeken, details ophalen en KVK-nummers controleren.
  */
-final class Kvk extends AbstractResource
+class Kvk extends AbstractResource
 {
-    /** Toegestane aantallen resultaten per pagina. */
     private const ALLOWED_SIZES = [5, 10, 25, 50, 75];
 
     /**
@@ -21,9 +20,9 @@ final class Kvk extends AbstractResource
      * Een zoekopdracht zonder resultaat geeft een NotFoundException. Dat kost geen credits.
      *
      * @param string|null $naam       Handelsnaam om op te zoeken.
-     * @param string|null $kvkNummer  KVK-nummer van 8 cijfers.
+     * @param string|null $kvkNummer  KVK-nummer. De API controleert de opmaak (8 cijfers).
      * @param int         $page       Paginanummer, beginnend bij 1.
-     * @param int         $size       Resultaten per pagina: 5, 10, 25, 50 of 75. De KVK geeft maximaal 50 per verzoek terug.
+     * @param int         $size       Resultaten per pagina: 5, 10, 25, 50 of 75.
      *
      * @throws InvalidArgumentException Als zowel naam als KVK-nummer ontbreekt, of als de paginagrootte niet is toegestaan.
      */
@@ -50,14 +49,11 @@ final class Kvk extends AbstractResource
     /**
      * Haal de gegevens van een bedrijf op met het KVK-nummer.
      *
-     * @param string $kvkNummer KVK-nummer van 8 cijfers.
+     * @param string $kvkNummer KVK-nummer. De API controleert de opmaak (8 cijfers).
      */
     public function get(string $kvkNummer): Response
     {
-        $kvkNummer = trim($kvkNummer);
-        if ($kvkNummer === '') {
-            throw new InvalidArgumentException('Het KVK-nummer mag niet leeg zijn.');
-        }
+        $kvkNummer = $this->requireNonEmpty($kvkNummer, 'Het KVK-nummer');
 
         return $this->transport->get('/v1/kvk/' . rawurlencode($kvkNummer));
     }
@@ -67,10 +63,10 @@ final class Kvk extends AbstractResource
      *
      * Een ongeldig nummer geeft geen fout, maar een antwoord met `valid: false`.
      *
-     * @param string $kvkNummer KVK-nummer van 8 cijfers.
+     * @param string $kvkNummer KVK-nummer. De API controleert de opmaak (8 cijfers).
      */
     public function validate(string $kvkNummer): Response
     {
-        return $this->transport->post('/v1/kvk/validate', ['kvkNummer' => trim($kvkNummer)], true);
+        return $this->transport->post('/v1/kvk/validate', ['kvkNummer' => $this->requireNonEmpty($kvkNummer, 'Het KVK-nummer')], true);
     }
 }

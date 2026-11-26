@@ -10,7 +10,7 @@ use InvalidArgumentException;
 /**
  * RDW-voertuiggegevens op kenteken.
  */
-final class Vehicle extends AbstractResource
+class Vehicle extends AbstractResource
 {
     /**
      * Haal de voertuiggegevens bij een kenteken op (RDW Basisregistratie Voertuigen).

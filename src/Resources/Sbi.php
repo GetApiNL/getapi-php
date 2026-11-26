@@ -10,7 +10,7 @@ use InvalidArgumentException;
 /**
  * CBS SBI-codes: de standaard bedrijfsindeling van het Centraal Bureau voor de Statistiek.
  */
-final class Sbi extends AbstractResource
+class Sbi extends AbstractResource
 {
     /**
      * Haal de SBI-codes op, optioneel per niveau of onder een bovenliggende code.

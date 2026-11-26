@@ -10,7 +10,7 @@ use InvalidArgumentException;
 /**
  * BAG-adressen: opzoeken op postcode en huisnummer, suggesties tijdens het typen en opzoeken op BAG-id.
  */
-final class Address extends AbstractResource
+class Address extends AbstractResource
 {
     /**
      * Zoek een adres op met postcode en huisnummer (BAG).
@@ -30,7 +30,7 @@ final class Address extends AbstractResource
         ?string $houseNumberAddition = null
     ): Response {
         return $this->transport->get('/v1/kadaster/bag/address', [
-            'postcode' => $postcode,
+            'postcode' => $this->requireNonEmpty($postcode, 'De postcode'),
         ] + $this->houseParameters($houseNumber, $houseLetter, $houseNumberAddition));
     }
 
@@ -83,7 +83,7 @@ final class Address extends AbstractResource
     public function postcode(string $postcode, ?int $number = null): Response
     {
         return $this->transport->get('/v1/lookup/postcode', [
-            'postcode' => $postcode,
+            'postcode' => $this->requireNonEmpty($postcode, 'De postcode'),
             'number' => $number,
         ]);
     }

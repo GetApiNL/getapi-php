@@ -1,8 +1,8 @@
 # GetAPI PHP-client
 
-[![Packagist](https://img.shields.io/packagist/v/getapinl/getapi.svg)](https://packagist.org/packages/getapinl/getapi)
+[![Packagist](https://img.shields.io/packagist/v/getapinl/getapi-php.svg)](https://packagist.org/packages/getapinl/getapi-php)
 [![Tests](https://github.com/GetApiNL/getapi-php/actions/workflows/tests.yml/badge.svg)](https://github.com/GetApiNL/getapi-php/actions/workflows/tests.yml)
-[![Licentie](https://img.shields.io/packagist/l/getapinl/getapi.svg)](LICENSE)
+[![Licentie](https://img.shields.io/packagist/l/getapinl/getapi-php.svg)](LICENSE)
 
 De officiële PHP-client voor [GetAPI.nl](https://getapi.nl/?utm_source=packagist&utm_medium=sdk&utm_campaign=php-readme): Nederlandse bedrijfs-, adres-, pand- en controlegegevens via één API-key. KVK, BAG, BTW (VIES), WOZ, energielabel, RDW en meer, zonder zelf een KVK-contract, certificaat of aparte koppelingen te regelen.
 
@@ -11,7 +11,7 @@ GetAPI verzamelt en publiceert de data zelf, onder een eigen domein, API en acco
 ## Snel starten
 
 ```bash
-composer require getapinl/getapi
+composer require getapinl/getapi-php
 ```
 
 ```php
@@ -44,7 +44,9 @@ Elke succesvolle aanroep die gegevens teruggeeft kost credits. Lege resultaten e
 
 ```php
 // Bedrijf zoeken op naam (resultaten staan in $response->data['results'])
-$response = $getapi->kvk()->search(naam: 'Voorbeeld', size: 10);
+$response = $getapi->kvk()->search('Voorbeeld', null, 1, 10);
+// Vanaf PHP 8.0 kan het ook met benoemde argumenten:
+// $response = $getapi->kvk()->search(naam: 'Voorbeeld', size: 10);
 
 // Adres opzoeken. Splits het adres in losse delen:
 // "Hooidrift 161C-03" wordt huisnummer 161, letter C en toevoeging 03.
@@ -66,16 +68,18 @@ $label = $getapi->property()->energyLabel('3023KN', 161);
 Elke methode geeft een `GetApi\Response` terug:
 
 ```php
-$response->data;              // de gegevens als array
-$response->statusCode;        // HTTP-status
-$response->creditsRemaining;  // resterende credits, of null
+$response->data();             // de gegevens als array (ook als alleen-lezen `$response->data`)
+$response->statusCode();       // HTTP-status
+$response->creditsRemaining(); // resterende credits, of null
 $response->header('Content-Type'); // een willekeurige header
 $response->get('naam', 'onbekend'); // één waarde met standaardwaarde
 ```
 
 ## Fouten afhandelen
 
-Alle fouten erven van `GetApi\Exceptions\GetApiException`.
+Alle fouten van de API en de verbinding erven van `GetApi\Exceptions\GetApiException`. Ongeldige invoer die de client zelf afkeurt (een lege postcode, een te lange zoektekst) geeft een standaard `InvalidArgumentException`, nog voordat er een verzoek wordt verstuurd.
+
+Bij een controle (BTW, IBAN, e-mail, KVK-nummer) is een ongeldige waarde geen fout maar een antwoord met `valid: false`. Een echte invoerfout, zoals een ontbrekend veld, geeft wel een `ValidationException`. Foutantwoorden zonder JSON (bijvoorbeeld een HTML-pagina van een proxy) worden op statuscode vertaald, dus ook dan krijg je een `RateLimitException` of `UpstreamUnavailableException`.
 
 | Exception | Wanneer |
 | --- | --- |
@@ -106,21 +110,18 @@ try {
 De client gebruikt PSR-18, dus elke HTTP-client werkt. Zonder instelling zoekt `php-http/discovery` zelf een geïnstalleerde client. Je kunt ook je eigen client meegeven, bijvoorbeeld om een time-out in te stellen of in tests een nep-client te gebruiken:
 
 ```php
-$getapi = new GetApi(
-    apiKey: 'ga_live_...',
-    httpClient: new \GuzzleHttp\Client(['timeout' => 10]),
-);
+$getapi = new GetApi\GetApi('ga_live_...', new \GuzzleHttp\Client(['timeout' => 10]));
 ```
+
+De client stelt zelf geen time-out in en probeert een verzoek na een 429 niet opnieuw. Beide hangen af van de HTTP-client die je meegeeft. Stel dus een time-out in en gebruik `RateLimitException::getRetryAfter()` als je zelf wilt herhalen. De basis-URL moet `https://` zijn, zodat je API-key niet onversleuteld over de lijn gaat (alleen `localhost` mag `http` gebruiken).
+
+In je eigen tests kun je `GetApi` en de resources (`$getapi->kvk()` enzovoort) mocken, want de klassen zijn niet `final`.
 
 Installeer zelf een PSR-18-client als je er nog geen hebt, bijvoorbeeld `composer require guzzlehttp/guzzle`.
 
-## Laravel
-
-Gebruik je Laravel? Dan is er een dunne wrapper met facade en configuratie: [getapinl/getapi-laravel](https://packagist.org/packages/getapinl/getapi-laravel).
-
 ## Eisen
 
-PHP 7.2 of hoger. De tests draaien in de CI op PHP 7.2 tot en met 8.5.
+PHP 7.2 of hoger, met de extensies `json` en `mbstring`. De voorbeelden met benoemde argumenten werken pas vanaf PHP 8.0. De tests draaien in de CI op PHP 7.2 tot en met 8.5.
 
 ## Tests draaien
 

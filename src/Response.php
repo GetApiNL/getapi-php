@@ -12,26 +12,14 @@ namespace GetApi;
  */
 final class Response
 {
-    /**
-     * De JSON-gegevens uit het antwoord, als array. Alleen lezen.
-     *
-     * @var array<string, mixed>
-     */
-    public $data;
+    /** @var array<string, mixed> */
+    private $data;
 
-    /**
-     * De HTTP-statuscode (200 bij succes). Alleen lezen.
-     *
-     * @var int
-     */
-    public $statusCode;
+    /** @var int */
+    private $statusCode;
 
-    /**
-     * Aantal credits dat je nog hebt, uit de header `X-Credits-Remaining`. Alleen lezen.
-     *
-     * @var int|null
-     */
-    public $creditsRemaining;
+    /** @var int|null */
+    private $creditsRemaining;
 
     /** @var array<string, string> */
     private $headers;
@@ -48,6 +36,59 @@ final class Response
         $this->statusCode = $statusCode;
         $this->creditsRemaining = $creditsRemaining;
         $this->headers = $headers;
+    }
+
+    /**
+     * De JSON-gegevens uit het antwoord, als array.
+     *
+     * @return array<string, mixed>
+     */
+    public function data(): array
+    {
+        return $this->data;
+    }
+
+    /** De HTTP-statuscode (200 bij succes). */
+    public function statusCode(): int
+    {
+        return $this->statusCode;
+    }
+
+    /** Aantal credits dat je nog hebt, uit de header `X-Credits-Remaining`, of null als die ontbreekt. */
+    public function creditsRemaining(): ?int
+    {
+        return $this->creditsRemaining;
+    }
+
+    /**
+     * Alleen-lezen toegang via `$response->data`, `$response->statusCode` en `$response->creditsRemaining`.
+     *
+     * @return mixed
+     */
+    public function __get(string $name)
+    {
+        if ($name === 'data' || $name === 'statusCode' || $name === 'creditsRemaining') {
+            return $this->$name;
+        }
+
+        trigger_error('Onbekende eigenschap Response::$' . $name, E_USER_NOTICE);
+
+        return null;
+    }
+
+    public function __isset(string $name): bool
+    {
+        return ($name === 'data' || $name === 'statusCode' || $name === 'creditsRemaining') && $this->$name !== null;
+    }
+
+    /**
+     * @param mixed $value
+     *
+     * @throws \LogicException
+     */
+    public function __set(string $name, $value): void
+    {
+        throw new \LogicException('Response is alleen-lezen.');
     }
 
     /** Geeft de waarde van een header terug (hoofdletters maken niet uit), of null als die ontbreekt. */

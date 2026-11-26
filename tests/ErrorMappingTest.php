@@ -107,6 +107,74 @@ final class ErrorMappingTest extends TestCase
         }
     }
 
+    /**
+     * @return array<string, array{int, class-string<ApiException>}>
+     */
+    public static function htmlStatusProvider(): array
+    {
+        return [
+            '429 als HTML' => [429, RateLimitException::class],
+            '503 als HTML' => [503, UpstreamUnavailableException::class],
+            '502 als HTML' => [502, ApiException::class],
+        ];
+    }
+
+    /**
+     * @dataProvider htmlStatusProvider
+     *
+     * @param class-string<ApiException> $expected
+     */
+    public function testFoutantwoordZonderJsonWordtOpStatusGemapt(int $status, string $expected): void
+    {
+        $this->http->addResponse(new Response($status, ['Content-Type' => 'text/html', 'Retry-After' => '7'], '<html>Even geduld</html>'));
+        $factory = new Psr17Factory();
+        $getapi = new \GetApi\GetApi('ga_live_test', $this->http, $factory, $factory);
+
+        try {
+            $getapi->kvk()->get('53743792');
+            self::fail('Er had een exception moeten komen.');
+        } catch (ApiException $e) {
+            self::assertInstanceOf($expected, $e);
+            self::assertSame($status, $e->getStatusCode());
+            if ($e instanceof RateLimitException) {
+                self::assertSame(7, $e->getRetryAfter());
+            }
+        }
+    }
+
+    public function testControleMet422ZonderValidSleutelIsEenValidationException(): void
+    {
+        $getapi = $this->clientReturning(422, ['message' => 'Het e-mailadres is te lang.', 'errors' => ['email' => ['Te lang.']]]);
+
+        $this->expectException(ValidationException::class);
+        $getapi->validation()->email('a@example.com');
+    }
+
+    public function testHttpBasisUrlWordtGeweigerd(): void
+    {
+        $factory = new Psr17Factory();
+
+        $this->expectException(\InvalidArgumentException::class);
+        new \GetApi\GetApi('ga_live_test', $this->http, $factory, $factory, 'http://api.getapi.nl');
+    }
+
+    public function testHttpMagVoorLocalhost(): void
+    {
+        $factory = new Psr17Factory();
+
+        self::assertInstanceOf(\GetApi\GetApi::class, new \GetApi\GetApi('ga_live_test', $this->http, $factory, $factory, 'http://localhost:8080'));
+    }
+
+    public function testResponseIsAlleenLezen(): void
+    {
+        $response = $this->clientReturning(200, ['naam' => 'X'])->kvk()->get('53743792');
+
+        self::assertSame(['naam' => 'X'], $response->data());
+        self::assertSame(['naam' => 'X'], $response->data);
+        $this->expectException(\LogicException::class);
+        $response->data = [];
+    }
+
     public function testNietGevondenGeeftDeInhoudVanHetAntwoord(): void
     {
         $getapi = $this->clientReturning(404, ['found' => false, 'error' => 'not_found']);
